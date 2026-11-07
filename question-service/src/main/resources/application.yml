@@ -1,0 +1,27 @@
+server:
+  port: 8083
+  error:
+    include-message: always
+services:
+  user-url: ${USER_SERVICE_URL:http://localhost:8081}
+  validation-url: ${VALIDATION_SERVICE_URL:http://localhost:8082}
+  lifecycle-url: ${LIFECYCLE_SERVICE_URL:http://localhost:8084}
+spring:
+  datasource:
+    url: jdbc:h2:file:./data/questions;DB_CLOSE_ON_EXIT=FALSE
+    username: sa
+    password:
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+  rabbitmq:
+    host: ${SPRING_RABBITMQ_HOST:localhost}
+    port: 5672
+    username: ${SPRING_RABBITMQ_USERNAME:saberpro}
+    password: ${SPRING_RABBITMQ_PASSWORD:saberpro123}
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info

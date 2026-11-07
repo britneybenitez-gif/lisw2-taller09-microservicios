@@ -1,0 +1,80 @@
+services:
+  rabbitmq:
+    image: rabbitmq:3.13-management-alpine
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-saberpro}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS:-saberpro123}
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+
+  user-service:
+    build: {context: ., dockerfile: Dockerfile, args: {MODULE: user-service}}
+    ports: ["8081:8081"]
+    environment:
+      DEMO_PASSWORD: ${DEMO_PASSWORD:-Demo123!}
+
+  validation-service:
+    build: {context: ., dockerfile: Dockerfile, args: {MODULE: validation-service}}
+    ports: ["8082:8082"]
+
+  lifecycle-service:
+    build: {context: ., dockerfile: Dockerfile, args: {MODULE: lifecycle-service}}
+    ports: ["8084:8084"]
+    environment: &rabbit_env
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_USERNAME: ${RABBITMQ_USER:-saberpro}
+      SPRING_RABBITMQ_PASSWORD: ${RABBITMQ_PASS:-saberpro123}
+    depends_on:
+      rabbitmq: {condition: service_healthy}
+    volumes: ["lifecycle_data:/app/data"]
+
+  question-service:
+    build: {context: ., dockerfile: Dockerfile, args: {MODULE: question-service}}
+    ports: ["8083:8083"]
+    environment:
+      <<: *rabbit_env
+      USER_SERVICE_URL: http://user-service:8081
+      VALIDATION_SERVICE_URL: http://validation-service:8082
+      LIFECYCLE_SERVICE_URL: http://lifecycle-service:8084
+    depends_on:
+      rabbitmq: {condition: service_healthy}
+      user-service: {condition: service_started}
+      validation-service: {condition: service_started}
+      lifecycle-service: {condition: service_started}
+    volumes: ["question_data:/app/data"]
+
+  review-service:
+    build: {context: ., dockerfile: Dockerfile, args: {MODULE: review-service}}
+    ports: ["8085:8085"]
+    environment:
+      <<: *rabbit_env
+      USER_SERVICE_URL: http://user-service:8081
+      LIFECYCLE_SERVICE_URL: http://lifecycle-service:8084
+    depends_on:
+      rabbitmq: {condition: service_healthy}
+      user-service: {condition: service_started}
+      lifecycle-service: {condition: service_started}
+    volumes: ["review_data:/app/data"]
+
+  notification-service:
+    build: {context: ., dockerfile: Dockerfile, args: {MODULE: notification-service}}
+    ports: ["8086:8086"]
+    environment: *rabbit_env
+    depends_on:
+      rabbitmq: {condition: service_healthy}
+    volumes: ["notification_data:/app/data"]
+
+volumes:
+  rabbitmq_data:
+  lifecycle_data:
+  question_data:
+  review_data:
+  notification_data:

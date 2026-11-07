@@ -1,0 +1,11 @@
+target/
+**/target/
+**/data/*
+!**/data/.gitkeep
+.mvn/
+.idea/
+.vscode/
+*.iml
+.DS_Store
+*.log
+.env

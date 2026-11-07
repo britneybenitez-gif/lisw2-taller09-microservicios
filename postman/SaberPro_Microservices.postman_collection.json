@@ -1,0 +1,1077 @@
+{
+  "info": {
+    "name": "Taller 09 · Saber PRO · Microservicios",
+    "description": "Taller LISW2: ejecutar el flujo en orden y esperar el resultado COMPLETED de /operations antes de asignar.\nTokens opacos (no JWT); cuentas: docente, administrador, revisor; contraseña Demo123! configurada como demo_password.\nLos casos 04/05 de decisión dependen del estado creado por solicitudes anteriores.",
+    "_postman_id": "a9ba7c6d-aa66-4cd0-ae9c-c0148d670009",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "01 · User Service · autenticación",
+      "item": [
+        {
+          "name": "01 Login docente (guardar teacher_token)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{user_service_url}}/auth/login",
+            "description": "Ejecutar con el entorno Taller09_Local seleccionado.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"docente\",\n  \"password\": \"{{demo_password}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "var data=pm.response.json();",
+                  "pm.environment.set(\"teacher_token\", data.accessToken);",
+                  "pm.collectionVariables.set(\"teacher_token\", data.accessToken);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "02 Login administrador (guardar admin_token)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{user_service_url}}/auth/login",
+            "description": "Ejecutar con el entorno Taller09_Local seleccionado.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"administrador\",\n  \"password\": \"{{demo_password}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "var data=pm.response.json();",
+                  "pm.environment.set(\"admin_token\", data.accessToken);",
+                  "pm.collectionVariables.set(\"admin_token\", data.accessToken);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "03 Login revisor (guardar reviewer_token)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{user_service_url}}/auth/login",
+            "description": "Ejecutar con el entorno Taller09_Local seleccionado.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"revisor\",\n  \"password\": \"{{demo_password}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "var data=pm.response.json();",
+                  "pm.environment.set(\"reviewer_token\", data.accessToken);",
+                  "pm.collectionVariables.set(\"reviewer_token\", data.accessToken);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "04 Credenciales incorrectas → 401",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{user_service_url}}/auth/login",
+            "description": "Ejecutar con el entorno Taller09_Local seleccionado.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"docente\",\n  \"password\": \"incorrecta\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código HTTP 401\", function () { pm.response.to.have.status(401); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "05 Verificar docente",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{teacher_token}}"
+              }
+            ],
+            "url": "{{user_service_url}}/auth/verify",
+            "description": "Ejecutar con el entorno Taller09_Local seleccionado."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código HTTP 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "02 · Validation Service · REST",
+      "item": [
+        {
+          "name": "01 Pregunta válida",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{validation_service_url}}/validate",
+            "description": "Ejecutar con el entorno Taller09_Local seleccionado.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"statement\": \"En Java, ¿cuál palabra clave permite heredar de una clase?\",\n  \"options\": [\n    {\n      \"id\": \"A\",\n      \"text\": \"implements\"\n    },\n    {\n      \"id\": \"B\",\n      \"text\": \"extends\"\n    },\n    {\n      \"id\": \"C\",\n      \"text\": \"import\"\n    },\n    {\n      \"id\": \"D\",\n      \"text\": \"package\"\n    }\n  ],\n  \"correctOptionId\": \"B\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Estructura válida\",()=>pm.expect(pm.response.json().valid).to.eql(true));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "02 Pregunta inválida",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{validation_service_url}}/validate",
+            "description": "Ejecutar con el entorno Taller09_Local seleccionado.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"statement\": \"¿Cuál es la estructura de datos?\",\n  \"options\": [\n    {\n      \"id\": \"A\",\n      \"text\": \"Pila\"\n    },\n    {\n      \"id\": \"B\",\n      \"text\": \"Cola\"\n    }\n  ],\n  \"correctOptionId\": \"Z\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Errores identificados\",()=>pm.expect(pm.response.json().valid).to.eql(false));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "03 · Question Service · creación y envío",
+      "item": [
+        {
+          "name": "01 Crear pregunta válida → 201",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{teacher_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{question_service_url}}/questions",
+            "description": "Ejecutar con el entorno Taller09_Local seleccionado.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"statement\": \"En Java, ¿cuál palabra clave permite heredar de una clase?\",\n  \"options\": [\n    {\n      \"id\": \"A\",\n      \"text\": \"implements\"\n    },\n    {\n      \"id\": \"B\",\n      \"text\": \"extends\"\n    },\n    {\n      \"id\": \"C\",\n      \"text\": \"import\"\n    },\n    {\n      \"id\": \"D\",\n      \"text\": \"package\"\n    }\n  ],\n  \"correctOptionId\": \"B\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código HTTP 201\", function () { pm.response.to.have.status(201); });",
+                  "var data=pm.response.json();",
+                  "pm.environment.set(\"question_id\", data.id);",
+                  "pm.collectionVariables.set(\"question_id\", data.id);",
+                  "pm.test(\"Estado inicial DRAFT\",()=>pm.expect(pm.response.json().status).to.eql(\"DRAFT\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "02 Crear pregunta inválida → 400",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{teacher_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{question_service_url}}/questions",
+            "description": "Ejecutar con el entorno Taller09_Local seleccionado.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"statement\": \"¿Cuál es la estructura de datos?\",\n  \"options\": [\n    {\n      \"id\": \"A\",\n      \"text\": \"Pila\"\n    },\n    {\n      \"id\": \"B\",\n      \"text\": \"Cola\"\n    }\n  ],\n  \"correctOptionId\": \"Z\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código HTTP 400\", function () { pm.response.to.have.status(400); });",
+                  "pm.test(\"Incluye errores\",()=>pm.expect(pm.response.json().errors.length).to.be.above(0));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "03 Consultar pregunta y estado",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{teacher_token}}"
+              }
+            ],
+            "url": "{{question_service_url}}/questions/{{question_id}}",
+            "description": "Ejecutar con el entorno Taller09_Local seleccionado."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código HTTP 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "04 Enviar a revisión → 202 + operationId",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{teacher_token}}"
+              }
+            ],
+            "url": "{{question_service_url}}/questions/{{question_id}}/submit",
+            "description": "Ejecutar con el entorno Taller09_Local seleccionado."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código HTTP 202\", function () { pm.response.to.have.status(202); });",
+                  "var data=pm.response.json();",
+                  "pm.environment.set(\"operation_id\", data.operationId);",
+                  "pm.collectionVariables.set(\"operation_id\", data.operationId);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "05 Consultar operación hasta COMPLETED",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{teacher_token}}"
+              }
+            ],
+            "url": "{{question_service_url}}/operations/{{operation_id}}",
+            "description": "Ejecutar con el entorno Taller09_Local seleccionado."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Estado consultable\",()=>pm.expect([\"PROCESSING\",\"COMPLETED\",\"FAILED\"]).to.include(pm.response.json().status));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "06 Repetir envío ya procesado → 409",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{teacher_token}}"
+              }
+            ],
+            "url": "{{question_service_url}}/questions/{{question_id}}/submit",
+            "description": "Ejecutar con el entorno Taller09_Local seleccionado."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código HTTP 409\", function () { pm.response.to.have.status(409); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "04 · Lifecycle Service · autoridad de estados",
+      "item": [
+        {
+          "name": "01 Consultar estado antes/después de la revisión",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{lifecycle_service_url}}/lifecycle/{{question_id}}",
+            "description": "Ejecutar con el entorno Taller09_Local seleccionado."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código HTTP 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "02 Rechazar transición DRAFT → APPROVED → 409 (usar pregunta nueva)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{lifecycle_service_url}}/lifecycle/{{question_id}}/transition",
+            "description": "Ejecutar con el entorno Taller09_Local seleccionado.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"expectedStatus\": \"DRAFT\",\n  \"targetStatus\": \"APPROVED\",\n  \"reason\": \"Transición inválida\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código HTTP 409\", function () { pm.response.to.have.status(409); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "03 Consultar resultado directo",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{lifecycle_service_url}}/operations/{{operation_id}}",
+            "description": "Ejecutar con el entorno Taller09_Local seleccionado."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código HTTP 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "05 · Review Service · asignación y revisión",
+      "item": [
+        {
+          "name": "01 Asignar revisor 3 en PENDING_REVIEW",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{review_service_url}}/reviews/assign",
+            "description": "Ejecutar con el entorno Taller09_Local seleccionado.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"questionId\": \"{{question_id}}\",\n  \"reviewerId\": 3\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Creación o aceptación\",()=>pm.expect([201,202]).to.include(pm.response.code));",
+                  "var data=pm.response.json();",
+                  "pm.environment.set(\"assignment_id\", data.id);",
+                  "pm.collectionVariables.set(\"assignment_id\", data.id);",
+                  "var data=pm.response.json();",
+                  "pm.environment.set(\"event_id\", data.eventId);",
+                  "pm.collectionVariables.set(\"event_id\", data.eventId);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "02 Consultar asignación",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{review_service_url}}/reviews/{{assignment_id}}",
+            "description": "Ejecutar con el entorno Taller09_Local seleccionado."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código HTTP 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "03 Rechazar pregunta con motivo",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{reviewer_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{review_service_url}}/reviews/{{assignment_id}}/decision",
+            "description": "Ejecutar con el entorno Taller09_Local seleccionado.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"decision\": \"REJECTED\",\n  \"reason\": \"Debe mejorar el enunciado y justificar la clave.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código HTTP 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "04 Corregir pregunta rechazada → DRAFT",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{teacher_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{question_service_url}}/questions/{{question_id}}",
+            "description": "Ejecutar con el entorno Taller09_Local seleccionado.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"statement\": \"En programación Java orientada a objetos, ¿qué palabra se utiliza para heredar de una clase?\",\n  \"options\": [\n    {\n      \"id\": \"A\",\n      \"text\": \"implements\"\n    },\n    {\n      \"id\": \"B\",\n      \"text\": \"extends\"\n    },\n    {\n      \"id\": \"C\",\n      \"text\": \"import\"\n    },\n    {\n      \"id\": \"D\",\n      \"text\": \"package\"\n    }\n  ],\n  \"correctOptionId\": \"B\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código HTTP 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "05 Reenviar pregunta corregida → 202",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{teacher_token}}"
+              }
+            ],
+            "url": "{{question_service_url}}/questions/{{question_id}}/submit",
+            "description": "Ejecutar con el entorno Taller09_Local seleccionado."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código HTTP 202\", function () { pm.response.to.have.status(202); });",
+                  "var data=pm.response.json();",
+                  "pm.environment.set(\"operation_id\", data.operationId);",
+                  "pm.collectionVariables.set(\"operation_id\", data.operationId);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "06 Consultar nueva operación",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{teacher_token}}"
+              }
+            ],
+            "url": "{{question_service_url}}/operations/{{operation_id}}",
+            "description": "Ejecutar con el entorno Taller09_Local seleccionado."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código HTTP 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "07 Reasignar en segunda ronda",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{review_service_url}}/reviews/assign",
+            "description": "Ejecutar con el entorno Taller09_Local seleccionado.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"questionId\": \"{{question_id}}\",\n  \"reviewerId\": 3\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Creación o aceptación\",()=>pm.expect([201,202]).to.include(pm.response.code));",
+                  "var data=pm.response.json();",
+                  "pm.environment.set(\"assignment_id\", data.id);",
+                  "pm.collectionVariables.set(\"assignment_id\", data.id);",
+                  "var data=pm.response.json();",
+                  "pm.environment.set(\"event_id\", data.eventId);",
+                  "pm.collectionVariables.set(\"event_id\", data.eventId);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "08 Aprobar en segunda ronda",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{reviewer_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{review_service_url}}/reviews/{{assignment_id}}/decision",
+            "description": "Ejecutar con el entorno Taller09_Local seleccionado.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"decision\": \"APPROVED\",\n  \"reason\": \"Validada y aprobada.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código HTTP 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "09 Publicar pregunta aprobada",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{lifecycle_service_url}}/lifecycle/{{question_id}}/transition",
+            "description": "Ejecutar con el entorno Taller09_Local seleccionado.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"expectedStatus\": \"APPROVED\",\n  \"targetStatus\": \"PUBLISHED\",\n  \"reason\": \"Aprobada para simulacros\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código HTTP 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "06 · Notification Service · mensajería",
+      "item": [
+        {
+          "name": "01 Consultar notificaciones generadas",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{notification_service_url}}/notifications",
+            "description": "Ejecutar con el entorno Taller09_Local seleccionado."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código HTTP 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "02 Consultar evento de última asignación",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{notification_service_url}}/notifications/{{event_id}}",
+            "description": "Ejecutar con el entorno Taller09_Local seleccionado."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Envío simulado\",()=>pm.expect(pm.response.json().deliveryStatus).to.eql(\"SENT_SIMULATED\"));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "07 · Errores y recuperación",
+      "item": [
+        {
+          "name": "01 Usuario sin token → 401",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{question_service_url}}/questions",
+            "description": "Ejecutar con el entorno Taller09_Local seleccionado.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"statement\": \"En Java, ¿cuál palabra clave permite heredar de una clase?\",\n  \"options\": [\n    {\n      \"id\": \"A\",\n      \"text\": \"implements\"\n    },\n    {\n      \"id\": \"B\",\n      \"text\": \"extends\"\n    },\n    {\n      \"id\": \"C\",\n      \"text\": \"import\"\n    },\n    {\n      \"id\": \"D\",\n      \"text\": \"package\"\n    }\n  ],\n  \"correctOptionId\": \"B\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código HTTP 401\", function () { pm.response.to.have.status(401); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "02 Revisor inválido → 400 (requiere pregunta PENDING_REVIEW)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{review_service_url}}/reviews/assign",
+            "description": "Ejecutar con el entorno Taller09_Local seleccionado.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"questionId\": \"{{question_id}}\",\n  \"reviewerId\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código HTTP 400\", function () { pm.response.to.have.status(400); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "03 Revisar operación inexistente → 404",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{teacher_token}}"
+              }
+            ],
+            "url": "{{question_service_url}}/operations/operacion-inexistente",
+            "description": "Ejecutar con el entorno Taller09_Local seleccionado."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código HTTP 404\", function () { pm.response.to.have.status(404); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "04 Reintentar aviso si está pendiente",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": "{{review_service_url}}/reviews/{{assignment_id}}/retry-notification",
+            "description": "Ejecutar con el entorno Taller09_Local seleccionado."
+          }
+        },
+        {
+          "name": "05 Reconciliar reserva si quedó sin confirmar",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": "{{review_service_url}}/reviews/{{assignment_id}}/reconcile",
+            "description": "Ejecutar con el entorno Taller09_Local seleccionado."
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "user_service_url",
+      "value": "http://localhost:8081"
+    },
+    {
+      "key": "validation_service_url",
+      "value": "http://localhost:8082"
+    },
+    {
+      "key": "question_service_url",
+      "value": "http://localhost:8083"
+    },
+    {
+      "key": "lifecycle_service_url",
+      "value": "http://localhost:8084"
+    },
+    {
+      "key": "review_service_url",
+      "value": "http://localhost:8085"
+    },
+    {
+      "key": "notification_service_url",
+      "value": "http://localhost:8086"
+    },
+    {
+      "key": "demo_password",
+      "value": "Demo123!"
+    },
+    {
+      "key": "teacher_token",
+      "value": ""
+    },
+    {
+      "key": "admin_token",
+      "value": ""
+    },
+    {
+      "key": "reviewer_token",
+      "value": ""
+    },
+    {
+      "key": "question_id",
+      "value": ""
+    },
+    {
+      "key": "operation_id",
+      "value": ""
+    },
+    {
+      "key": "assignment_id",
+      "value": ""
+    },
+    {
+      "key": "event_id",
+      "value": ""
+    }
+  ]
+}
